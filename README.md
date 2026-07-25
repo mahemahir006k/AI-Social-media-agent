@@ -336,7 +336,7 @@ Please consider giving it a ⭐ on GitHub.
 
 # 👩‍💻 Author
 
-**Rohini Thulasiraman**
+**Mahendran B|| Aravinthkumar K**
 
 Technical Architect | AI Enthusiast | Java | Spring Boot | Azure | Flowise | Generative AI
 
