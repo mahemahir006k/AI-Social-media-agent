@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+    <title>Review Facebook Post</title>
+    <style>
+        body {
+            background: #f4f5f7;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            margin: auto;
+            max-width: 900px;
+            padding: 24px;
+        }
+
+        img {
+            border-radius: 12px;
+            display: block;
+            max-width: 100%;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-top: 18px;
+        }
+
+        input, textarea {
+            box-sizing: border-box;
+            margin-top: 6px;
+            padding: 12px;
+            width: 100%;
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        #caption {
+            min-height: 260px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 8px 0 0;
+            padding: 14px 18px;
+        }
+
+        .regenerate {
+            background: #f0ad4e;
+        }
+
+        .publish {
+            background: #1877f2;
+            color: white;
+        }
+
+        .publish:disabled {
+            background: #aaa;
+        }
+
+        #message {
+            font-weight: 700;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Review Facebook Post</h1>
+
+    <img
+        id="preview-image"
+        src="{{ draft.image_url }}"
+        alt="Generated post preview"
+    >
+
+    <label for="prompt">Image prompt</label>
+    <textarea id="prompt">{{ draft.prompt }}</textarea>
+
+    <label for="title">Title</label>
+    <input id="title" value="{{ draft.title }}">
+
+    <label for="subtitle">Subtitle</label>
+    <input id="subtitle" value="{{ draft.subtitle }}">
+
+    <label for="caption">Caption</label>
+    <textarea id="caption">{{ draft.caption }}</textarea>
+
+    <button class="regenerate" onclick="regeneratePost()">
+        Regenerate preview
+    </button>
+
+    <button
+        id="publish-button"
+        class="publish"
+        onclick="publishPost()"
+    >
+        Approve and publish
+    </button>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    const draftId = "{{ draft.id }}";
+    const reviewToken = "{{ token }}";
+
+    function currentValues() {
+        return {
+            token: reviewToken,
+            prompt: document.querySelector("#prompt").value,
+            title: document.querySelector("#title").value,
+            subtitle: document.querySelector("#subtitle").value,
+            caption: document.querySelector("#caption").value
+        };
+    }
+
+    async function regeneratePost() {
+        const message = document.querySelector("#message");
+        message.textContent = "Generating a new preview...";
+
+        const response = await fetch(
+            `/api/drafts/${draftId}/regenerate`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(currentValues())
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            message.textContent =
+                result.detail || "Regeneration failed.";
+            return;
+        }
+
+        document.querySelector("#preview-image").src =
+            result.preview_image_url;
+
+        message.textContent =
+            "New preview generated. Nothing published yet.";
+    }
+
+    async function publishPost() {
+        if (!confirm("Publish this post to Facebook now?")) {
+            return;
+        }
+
+        const button =
+            document.querySelector("#publish-button");
+
+        const message = document.querySelector("#message");
+
+        button.disabled = true;
+        message.textContent = "Publishing...";
+
+        const response = await fetch(
+            `/api/drafts/${draftId}/publish`,
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    token: reviewToken,
+                    caption:
+                        document.querySelector("#caption").value
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            button.disabled = false;
+            message.textContent =
+                result.detail || "Publishing failed.";
+            return;
+        }
+
+        message.textContent =
+            "Post successfully published to Facebook.";
+    }
+</script>
+</body>
+</html>
