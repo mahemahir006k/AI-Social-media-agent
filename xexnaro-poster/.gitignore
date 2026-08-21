@@ -1,0 +1,25 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+# Runtime/generated files
+output/
+*.db
+
+# Old copied backup
+company_text.xenhra.backup.txt
+
+# Python cache
+*.log
+
+# Accidental nested copy of old backend
+facebook-poster/
+
+# Old XEN HRA knowledge-builder leftovers
+company_data.json
+crawler.py
+knowledge_builder.py
+test_topic_news.py
+facebook_publisher - backup.py
